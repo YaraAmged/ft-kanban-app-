@@ -7,10 +7,13 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { deleteBoard } from "../../api/boards";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { setSelectedBoard } from "../../features/boards/boardsSlice";
+import {
+  deleteBoardAction,
+  setSelectedBoard,
+} from "../../features/boards/boardsSlice";
 interface DeleteBoardDialogProps {
   open: boolean;
   handleClose: () => void;
@@ -22,11 +25,20 @@ const DeleteBoardDialog: React.FC<DeleteBoardDialogProps> = ({
   const dispatch = useAppDispatch();
 
   const [loading, setLoading] = useState(false);
-  const selectedBoard = useAppSelector(({ boards }) => boards.selectedBoard);
+  const { selectedBoard: selectedBoardId, boards } = useAppSelector(
+    ({ boards }) => boards
+  );
+  const selectedBoard = useMemo(
+    () => boards.find((board) => board.id === selectedBoardId),
+    [selectedBoardId, boards]
+  );
   const handleDelete = async () => {
     setLoading(true);
-    await deleteBoard(selectedBoard!);
+    await deleteBoard(selectedBoardId!);
+    dispatch(deleteBoardAction(selectedBoardId!));
     dispatch(setSelectedBoard(undefined));
+    handleClose();
+
     setLoading(false);
   };
   return (
@@ -44,15 +56,14 @@ const DeleteBoardDialog: React.FC<DeleteBoardDialogProps> = ({
       <DialogContent sx={{ p: 0 }}>
         <Stack gap={"24px"}>
           <DialogContentText variant="body1">
-            Are you sure you want to delete the ‘Platform Launch’ board? This
-            action will remove all columns and tasks and cannot be reversed.
+            Are you sure you want to delete the ‘{selectedBoard?.name}’ board?
+            This action will remove all columns and tasks and cannot be
+            reversed.
           </DialogContentText>
-          <Stack direction={"row"} gap={"16px"} mb={"8px"}>
+          <Stack direction={{ sm: "row" }} gap={"16px"} mb={"8px"}>
             <Button
-              onClick={() => {
-                handleDelete();
-                handleClose();
-              }}
+              disabled={loading}
+              onClick={handleDelete}
               sx={{ padding: "9px 79px" }}
               size="medium"
               color="error"

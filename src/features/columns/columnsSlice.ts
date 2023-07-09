@@ -1,14 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-export interface Column {
-  id: string;
-  name: string;
-  cards: CardI[];
-}
-export interface CardI {
+export interface TaskI {
   name: string;
   idList: string;
   id: string;
   subTasks: string[];
+  desc: string;
+}
+export interface Column {
+  id: string;
+  name: string;
+  cards: TaskI[];
 }
 
 export interface ColumnsState {
@@ -18,7 +19,7 @@ export interface ColumnsState {
 
 const initialState: ColumnsState = {
   columns: [],
-  loading: true,
+  loading: false,
 };
 
 export const columnSlice = createSlice({
@@ -28,8 +29,12 @@ export const columnSlice = createSlice({
   reducers: {
     setColumns: (state, { payload }: PayloadAction<Column[]>) => {
       state.columns = payload;
+      state.loading = false;
     },
-    createTaskAction: (state, { payload }: PayloadAction<CardI>) => {
+    setColumnLoading: (state, { payload }: PayloadAction<boolean>) => {
+      state.loading = payload;
+    },
+    createTaskAction: (state, { payload }: PayloadAction<TaskI>) => {
       const columnIndex = state.columns.findIndex(
         (col) => col.id === payload.idList
       );
@@ -37,15 +42,28 @@ export const columnSlice = createSlice({
     },
     updateTaskAction: (
       state,
-      { payload }: PayloadAction<{ card: CardI; id: string }>
+      { payload }: PayloadAction<{ task: TaskI; id: string; oldColumn: string }>
     ) => {
       const columnIndex = state.columns.findIndex(
-        (col) => col.id === payload.card.idList
+        (col) => col.id === payload.task.idList
       );
       const taskIndex = state.columns[columnIndex].cards.findIndex(
         (card) => card.id === payload.id
       );
-      state.columns[columnIndex].cards.splice(taskIndex, 1, payload.card);
+      const isInSameColumn = payload.task.idList === payload.oldColumn;
+      if (isInSameColumn) {
+        state.columns[columnIndex].cards.splice(taskIndex, 1, payload.task);
+      } else {
+        const oldColumnIndex = state.columns.findIndex(
+          (col) => col.id === payload.oldColumn
+        );
+
+        const oldTaskIndex = state.columns[columnIndex].cards.findIndex(
+          (card) => card.id === payload.id
+        );
+        state.columns[oldColumnIndex].cards.splice(oldTaskIndex, 1);
+        state.columns[columnIndex].cards.push(payload.task);
+      }
     },
     removeTaskAction: (
       state,
@@ -70,6 +88,7 @@ export const {
   updateTaskAction,
   createTaskAction,
   removeTaskAction,
+  setColumnLoading,
 } = columnSlice.actions;
 
 export default columnSlice.reducer;

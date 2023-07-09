@@ -1,5 +1,6 @@
 import { Circle } from "@mui/icons-material";
 import {
+  CircularProgress,
   List,
   ListItem,
   ListSubheader,
@@ -10,8 +11,8 @@ import {
 import React from "react";
 import { useAppSelector } from "../../app/hooks";
 import AddBoardDialog from "../AddBoardDialog/AddBoardDialog";
-import Task from "../Task/Task";
 import EmptyBoard from "../EmptyBoard/EmptyBoard";
+import Task from "../Task/Task";
 const ColorMap: any = {
   "To Do": "#49C4E5",
   Doing: "#8471F2",
@@ -19,19 +20,27 @@ const ColorMap: any = {
 };
 interface ColumnProps {}
 const Columns: React.FC<ColumnProps> = () => {
-  const columns = useAppSelector(({ columns }) => columns.columns);
+  const { columns, loading } = useAppSelector(({ columns }) => columns);
   const [updateOpen, setUpdateOpen] = React.useState(false);
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const column = useAppSelector(({ columns }) => columns.columns);
   const theme = useTheme();
   const selectedBoard = useAppSelector(({ boards }) =>
     boards.boards.find((board) => board.id === boards.selectedBoard)
   );
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  if (!selectedBoard) return null;
+  if (loading)
+    return (
+      <Stack
+        alignItems={"center"}
+        justifyContent={"center"}
+        height={"calc(100vh - 121px)"}
+        width={"100%"}
+      >
+        <CircularProgress size={50} sx={{ margin: "auto" }} />
+      </Stack>
+    );
   if (columns.length === 0) {
-    <EmptyBoard />;
+    return <EmptyBoard />;
   }
   return (
     <>
@@ -43,10 +52,15 @@ const Columns: React.FC<ColumnProps> = () => {
         />
       )}
 
-      <Stack direction={"row"}>
+      <Stack
+        direction={"row"}
+        height={"100%"}
+        width={"max-content"}
+        gap={"24px"}
+      >
         {column.map((column) => (
-          <List>
-            <ListSubheader sx={{ pb: "24px", background: "none" }}>
+          <List sx={{ width: "280px" }} data-testid="column-card">
+            <ListSubheader sx={{ px: 0, pb: "24px", background: "none" }}>
               <Stack direction={"row"} gap={"12px"}>
                 <Circle
                   sx={{
@@ -61,25 +75,27 @@ const Columns: React.FC<ColumnProps> = () => {
               </Stack>
             </ListSubheader>
             {column.cards.map((card) => (
-              <ListItem>
-                <Task card={card} />
+              <ListItem sx={{ width: "100%", p: 0 }}>
+                <Task task={card} />
               </ListItem>
             ))}
           </List>
         ))}
         <Stack
-          onClick={(e) => {
-            setUpdateOpen(true);
-            handleClose();
-          }}
+          onClick={() => setUpdateOpen(true)}
           sx={{
+            "&:hover": {
+              cursor: "pointer",
+              color: theme.palette.primary.main,
+            },
             backgroundColor:
               theme.palette.mode === "light" ? "#eaeffa" : "#23242e",
             color: theme.palette.grayish.main,
+            width: "280px",
+            height: "100%",
           }}
           justifyContent={"center"}
           alignItems={"center"}
-          padding={"392px 55.5px"}
         >
           <Typography variant="XL"> + New Column</Typography>
         </Stack>

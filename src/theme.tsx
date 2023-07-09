@@ -88,7 +88,7 @@ const components: ThemeOptions["components"] = {
       root: ({ theme }) => ({
         borderRadius: "0px 100px 100px 0px",
         color: theme.palette.grayish.main,
-        width: "276px",
+        marginRight: "24px",
         paddingLeft: "32px",
         "&:hover": {
           color: theme.palette.primary.main,
@@ -97,16 +97,11 @@ const components: ThemeOptions["components"] = {
               ? alpha(theme.palette.primary.main, 0.1)
               : "#fff",
         },
-        "&.Mui-selected": {
+        "&.Mui-selected, &.Mui-selected:hover": {
           backgroundColor: theme.palette.primary.main,
           color: "#ffff",
         },
       }),
-    },
-  },
-  MuiContainer: {
-    defaultProps: {
-      sx: { px: { md: "125px", sm: "39px", xs: "24px" } },
     },
   },
   MuiTextField: {
@@ -116,24 +111,45 @@ const components: ThemeOptions["components"] = {
       },
     },
   },
+  MuiPaper: {
+    styleOverrides: {
+      root: {
+        backgroundImage: "none",
+      },
+    },
+  },
   MuiButton: {
     styleOverrides: {
+      disabled: ({ theme }) => ({
+        background: theme.palette.primary.light,
+      }),
       sizeLarge: {
         padding: "15px 24px 14px 24px",
         ...typography.M,
       },
-      root: {
+      root: ({ theme }) => ({
         textTransform: "none",
         padding: "9px 69px",
         borderRadius: "24px",
         ...typography.body2,
-      },
+        "&.Mui-disabled": {
+          background: alpha(theme.palette.primary.main, 0.25),
+          color: "white",
+        },
+      }),
     },
     defaultProps: {
       variant: "contained",
       color: "primary",
       disableElevation: true,
       size: "large",
+    },
+  },
+  MuiSelect: {
+    styleOverrides: {
+      outlined: {
+        "&.MuiInputBase-input": { paddingTop: "10px", paddingBottom: "10px" },
+      },
     },
   },
   MuiCheckbox: {

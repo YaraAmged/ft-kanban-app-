@@ -15,9 +15,11 @@ export const createBoard = async ({
     { params: { name, defaultLists: false } }
   );
   const board = res.data;
+  const createdColumns: Column[] = [];
   for (let column of columns) {
-    await createColumn(board.id, column);
+    createdColumns.push(await createColumn(board.id, column));
   }
+  board.columns = createdColumns;
   return board;
 };
 export const deleteBoard = async (id: string) => {

@@ -6,7 +6,9 @@ export const createColumn = async (id: string, name: string) => {
     {},
     { params: { name } }
   );
-  return res.data;
+  const column = res.data;
+  column.cards = [];
+  return column;
 };
 export const deleteColumn = async (id: string) => {
   return await requester.put(

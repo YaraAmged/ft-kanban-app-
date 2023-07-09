@@ -3,15 +3,17 @@ import { IconButton, useTheme } from "@mui/material";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import * as React from "react";
-import { useAppSelector } from "../../app/hooks";
+import { TaskI } from "../../features/columns/columnsSlice";
 import AddNewTaskDialog from "../AddNewTaskDialog/AddNewTaskDialog";
-import DeleteBoardDialog from "../DeleteBoardDialog/DeleteBoardDialog";
-
-function BoardMenu() {
+import DeleteTaskDialog from "../DeleteTaskDialog/DeleteTaskDialog";
+interface TaskMenuProps {
+  task: TaskI;
+}
+const TaskMenu: React.FC<TaskMenuProps> = ({ task }) => {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [updateOpen, setUpdateOpen] = React.useState(false);
-  const [deleteOpen, setdeleteOpen] = React.useState(false);
+  const [deleteOpen, setDeleteOpen] = React.useState(false);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -19,9 +21,6 @@ function BoardMenu() {
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const selectedBoard = useAppSelector(({ boards }) =>
-    boards.boards.find((board) => board.id === boards.selectedBoard)
-  );
   return (
     <div>
       <IconButton
@@ -34,16 +33,20 @@ function BoardMenu() {
       >
         <MoreVert />
       </IconButton>
-      {updateOpen && (
-        <AddNewTaskDialog
-          //   oldTask={selectedBoard}
-          open={updateOpen}
-          handleClose={() => setUpdateOpen(false)}
-        />
-      )}
-      <DeleteBoardDialog
+
+      <AddNewTaskDialog
+        oldTask={task}
+        open={updateOpen}
+        handleClose={() => setUpdateOpen(false)}
+      />
+
+      <DeleteTaskDialog
         open={deleteOpen}
-        handleClose={() => setdeleteOpen(false)}
+        task={task}
+        handleClose={() => {
+          setDeleteOpen(false);
+          handleClose();
+        }}
       />
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
         <MenuItem
@@ -59,7 +62,7 @@ function BoardMenu() {
         <MenuItem
           sx={{ color: theme.palette.error.main }}
           onClick={(e) => {
-            setdeleteOpen(true);
+            setDeleteOpen(true);
             handleClose();
           }}
         >
@@ -68,6 +71,6 @@ function BoardMenu() {
       </Menu>
     </div>
   );
-}
+};
 
-export default BoardMenu;
+export default TaskMenu;

@@ -1,17 +1,12 @@
-import React from "react";
-import { getByTestId, render, waitFor } from "@testing-library/react";
-import { Provider } from "react-redux";
-import { store } from "./app/store";
+import { render, screen, waitFor } from "@testing-library/react";
 import App from "./App";
-import { getBoards } from "./api/boards";
 
-// describe("App", () => {
-//   test("columns fetched and rendered correctly", () => {
-//     const { getByTestId, getAllByTestId, getByText } = render(<App />);
-//     const boards = await getBoards();
-//     await waitFor(() => getByTestId("board-button").click());
-//     await waitFor(() =>
-//       expect(getAllByTestId("column-card").length === boards.length)
-//     );
-//   });
-// });
+describe("App", () => {
+  test("columns fetched and rendered correctly", async () => {
+    render(<App />);
+    await waitFor(() => screen.getByTestId("board-button").click());
+    await waitFor(() =>
+      expect(screen.getAllByTestId("column-card").length > 0)
+    );
+  });
+});

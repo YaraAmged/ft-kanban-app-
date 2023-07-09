@@ -20,7 +20,10 @@ import {
   addBoard,
   updateBoard,
 } from "../../features/boards/boardsSlice";
-import { setColumns as setColumnsAction } from "../../features/columns/columnsSlice";
+import {
+  Column,
+  setColumns as setColumnsAction,
+} from "../../features/columns/columnsSlice";
 interface AddBoardDialogProps {
   oldBoard?: Board;
   open: boolean;
@@ -39,7 +42,9 @@ const AddBoardDialog: React.FC<AddBoardDialogProps> = ({
   );
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
-  const { register, control, formState, handleSubmit, reset } = useForm({
+  const { register, control, handleSubmit, reset } = useForm<
+    Board & { columns: Column[] }
+  >({
     defaultValues: oldBoard
       ? { ...oldBoard, columns: selectedBoardColumns }
       : { columns: [] },
@@ -47,6 +52,7 @@ const AddBoardDialog: React.FC<AddBoardDialogProps> = ({
 
   useEffect(() => {
     reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
   const {
     fields: columns,
@@ -54,9 +60,10 @@ const AddBoardDialog: React.FC<AddBoardDialogProps> = ({
     remove,
   } = useFieldArray({ control: control as any, name: "columns" });
 
-  const handleSave = handleSubmit(async (data: any) => {
+  const handleSave = handleSubmit(async (data) => {
     setLoading(true);
-    const columns = data.columns.map((col: any) => col.name);
+    const columns = data.columns.map((col) => col.name);
+
     if (oldBoard) {
       const board = await updateBoardAPI(
         { id: oldBoard.id, columns: selectedBoardColumns },
@@ -67,7 +74,6 @@ const AddBoardDialog: React.FC<AddBoardDialogProps> = ({
     } else {
       const board = await createBoard({ name: data.name, columns });
       dispatch(addBoard(board));
-
       dispatch(setColumnsAction(board.columns));
     }
     setLoading(false);
